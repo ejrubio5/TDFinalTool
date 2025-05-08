@@ -5,37 +5,33 @@ import shiboken2
 import maya.cmds as mc
 
 def IsMesh(obj):
-    shapes = mc.listRelatives(obj, s=True)
+    shapes = mc.listRelatives(obj, s=True, fullPath=True)
     if not shapes:
         return False
     
     for s in shapes:
-        if mc.objectType(s) == "mesh":
+        if mc.objExists(s) and mc.objectType(s) == "mesh":
             return True
 
     return False
 
 def IsController(obj):
-    shapes = mc.listRelatives(obj, s=True)
+    shapes = mc.listRelatives(obj, s=True, fullPath=True)
     if not shapes:
         return False
     
     for s in shapes:
-        if mc.objectType(s) == "nurbsCurve":
+        if mc.objExists(s) and mc.objectType(s) == "nurbsCurve":
             return True
 
     return False
 
 def IsGroup(obj):
-    shapes = mc.listRelatives(obj, s=True)
-    if not shapes:
+    if mc.objectType(obj) != "transform":
         return False
     
-    for s in shapes:
-        if len(shapes) == 0:
-            return True
-
-    return False
+    shapes = mc.listRelatives(obj, s=True, fullPath=True) or []
+    return len(shapes) == 0
 
 def GetMayaMainWindow()->QMainWindow:
     mainWindow = omui.MQtUtil.mainWindow()
@@ -53,4 +49,4 @@ class MayaWindow(QWidget):
         self.setObjectName(self.GetWidgetUniqueName())
 
     def GetWidgetUniqueName(self):
-        return "akjsboecnalcsvakajgvflawha"
+        return "okvnsaponfosanjvp"

@@ -3,16 +3,12 @@ import MayaUtils
 importlib.reload(MayaUtils)
 
 from MayaUtils import MayaWindow
-from PySide2.QtGui import QColor
-from PySide2.QtWidgets import QColorDialog, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QSlider, QVBoxLayout, QWidget
-from PySide2.QtCore import Qt, Signal
-from maya.OpenMaya import MVector
-import maya.mel as mel
+from PySide2.QtWidgets import QLabel, QMessageBox, QPushButton, QVBoxLayout
 import maya.cmds as mc
 
 class AnimationKeyFinder:
-    def __init__(self):
-        return
+    def __init__(self, parent=None):
+        self.parent = parent
 
     def FindKeysBasedOnSelection(self, filterFunc):
         allTransforms = mc.ls(type='transform') or []
@@ -23,36 +19,51 @@ class AnimationKeyFinder:
         return matches
     
     def ShowErrorMessage(self, category):
-        QMessageBox.warning(self, "No keys Found!", f"No keyed {category} found in this scene!")
+        QMessageBox.warning(self.parent, "No keys Found!", f"No keyed {category} found in this scene!")
 
     def SelectControllers(self):
         controllers = self.FindKeysBasedOnSelection(MayaUtils.IsController)
-        mc.select(controllers, replace=True)
+        if controllers:
+            mc.select(controllers, replace=True)
+        else:
+            self.ShowErrorMessage("controllers")
     
     def SelectMeshes(self):
-        controllers = self.FindKeysBasedOnSelection(MayaUtils.IsController)
-        mc.select(controllers, replace=True)
+        meshes = self.FindKeysBasedOnSelection(MayaUtils.IsMesh)
+        if meshes:
+            mc.select(meshes, replace=True)
+        else:
+            self.ShowErrorMessage("meshes")
     
-    def SelectControllers(self):
-        controllers = self.FindKeysBasedOnSelection(MayaUtils.IsController)
-        mc.select(controllers, replace=True)
+    def SelectGroups(self):
+        groups = self.FindKeysBasedOnSelection(MayaUtils.IsGroup)
+        if groups:
+            mc.select(groups, replace=True)
+        else:
+            self.ShowErrorMessage("groups")
     
-    def SelectControllers(self):
+    def SelectAll(self):
         controllers = self.FindKeysBasedOnSelection(MayaUtils.IsController)
-        mc.select(controllers, replace=True)
-    
+        meshes = self.FindKeysBasedOnSelection(MayaUtils.IsMesh)
+        groups = self.FindKeysBasedOnSelection(MayaUtils.IsGroup)
+        allItems = controllers + meshes + groups
+
+        if allItems:
+            mc.select(allItems, replace=True)
+        else:
+            self.ShowErrorMessage("controllers, meshes, or groups")
 
 
 class KeyFinderWidget(MayaWindow):
     def __init__(self):
         super().__init__()
-        self.keyFinder = AnimationKeyFinder()
+        self.keyFinder = AnimationKeyFinder(parent=self)
         self.setWindowTitle("Animation Key Finder")
 
         self.masterLayout = QVBoxLayout()
         self.setLayout(self.masterLayout)
 
-        toolTipLabel = QLabel("Press the button for which objects you want to selct!")
+        toolTipLabel = QLabel("Press the button for which objects you want to select!")
         self.masterLayout.addWidget(toolTipLabel)
 
         selectCtrlsBtn = QPushButton("Select Controllers with Keys")
@@ -73,24 +84,27 @@ class KeyFinderWidget(MayaWindow):
 
     def SelectCtrlsBtnClicked(self):
         try:
-            self.keyFinder.FindKeysBasedOnSelection()
+            self.keyFinder.SelectControllers()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"{e}")
 
     def SelectMeshesBtnClicked(self):
         try:
-            self.keyFinder.FindKeysBasedOnSelection()
+            self.keyFinder.SelectMeshes()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"{e}")
 
     def SelectGrpsBtnClicked(self):
         try:
-            self.keyFinder.FindKeysBasedOnSelection()
+            self.keyFinder.SelectGroups()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"{e}")
 
     def SelectAllBtnClicked(self):
         try:
-            self.keyFinder.FindKeysBasedOnSelection()
+            self.keyFinder.SelectAll()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"{e}")
+
+keyFinderWidget = KeyFinderWidget()
+keyFinderWidget.show()

@@ -1,6 +1,6 @@
 import sys
 
-prjPath = "D:/profile redirect/ejrubio/Documents/MayaPlugins/src"
+prjPath = "D:/profile redirect/ejrubio/Documents/TDFinalTool/src"
 moduleDir = "D:/profile redirect/ejrubio/Documents"
 
 if prjPath not in sys.path:

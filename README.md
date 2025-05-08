@@ -2,7 +2,7 @@
 
 ## Animated Object Selector
 
-[Animated Object Selector]("src/TDFinalTool.py")
+[Animated Object Selector](./src/TDFinalTool.py)
 This tool allows you to select all objects that have animation keyframes on them depending on which obejcts you want to select.
 
 * Select All Controls with Animations Button
